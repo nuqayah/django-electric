@@ -1,0 +1,57 @@
+---
+
+x-defaults: &defaults
+  restart: unless-stopped
+  logging:
+    driver: local
+    options:
+      max-size: 100m
+  networks:
+    - backend
+
+services:
+  postgres:
+    <<: *defaults
+    image: postgres:16
+    ports:
+      - 127.0.0.1:${POSTGRES_PORT:-5432}:5432
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - fsman_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -U postgres' ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+
+  electric:
+    <<: *defaults
+    image: electricsql/electric:latest
+    container_name: electric-sync-service
+    ports:
+      - "${ELECTRIC_PORT}:${ELECTRIC_PORT}"
+      - "5033:5033" 
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      LOGICAL_PUBLISHER_HOST: postgres
+      AUTH_MODE: secure
+      AUTH_JWT_ALG: ${ELECTRIC_AUTH_JWT_ALG}
+      AUTH_JWT_KEY: ${ELECTRIC_AUTH_JWT_KEY}
+      HTTP_PORT: ${ELECTRIC_PORT}
+
+
+networks:
+  backend:
+    driver: bridge
+
+
+volumes:
+  fsman_pgdata:
+    driver: local
