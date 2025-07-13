@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@electric-sql/client':
+        specifier: ^1.0.7
+        version: 1.0.7
       '@electric-sql/pglite':
         specifier: ^0.3.4
         version: 0.3.4
@@ -30,6 +33,9 @@ packages:
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
+
+  '@electric-sql/client@1.0.7':
+    resolution: {integrity: sha512-w9geRoZL1gn294Nn68YxicRvWFJEXWYPr+jZubSOyjaSa6tVQJk0rjYuFmOwpQyudFQrsL17HFrGga9UOaBhdA==}
 
   '@electric-sql/pglite@0.3.4':
     resolution: {integrity: sha512-h5hoL2GuxcWN8Q3+jtesIRem14iIvAZVEsTeUF6eO9RiUb6ar73QVIEW9t+Ud58iXAcAE2dFMtWqw3W2Oo4LDw==}
@@ -206,6 +212,9 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.29':
     resolution: {integrity: sha512-uw6guiW/gcAGPDhLmd77/6lW8QLeiV5RUTsAX46Db6oLhGaVj4lhnPwb184s1bkc8kdVg/+h988dro8GRDpmYQ==}
+
+  '@microsoft/fetch-event-source@2.0.1':
+    resolution: {integrity: sha512-W6CLUJ2eBMw3Rec70qrsEW0jOm/3twwJv21mrmj2yORiaVmVYGS4sSS5yUwvQc1ZlDLYGPnClVWmUUMagKNsfA==}
 
   '@prisma/client@4.8.1':
     resolution: {integrity: sha512-d4xhZhETmeXK/yZ7K0KcVOzEfI5YKGGEr4F5SBV04/MU4ncN/HcE28sy3e4Yt8UFW0ZuImKFQJE+9rWt9WbGSQ==}
@@ -1441,6 +1450,12 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.12
       '@jridgewell/trace-mapping': 0.3.29
 
+  '@electric-sql/client@1.0.7':
+    dependencies:
+      '@microsoft/fetch-event-source': 2.0.1
+    optionalDependencies:
+      '@rollup/rollup-darwin-arm64': 4.45.0
+
   '@electric-sql/pglite@0.3.4': {}
 
   '@electric-sql/prisma-generator@1.1.5':
@@ -1543,6 +1558,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.4
+
+  '@microsoft/fetch-event-source@2.0.1': {}
 
   '@prisma/client@4.8.1':
     dependencies:
