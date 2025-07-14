@@ -1,6 +1,6 @@
 [tools]
 python = "3.12"
-node = "10"
+node = "22"
 
 
 [tasks.db-up]
@@ -12,16 +12,16 @@ run = "docker compose up -d electric"
 
 [tasks.migrate]
 depends = ['db-up']
-run = 'uv run manage.py migrate'
+run = 'cd backend && uv run manage.py migrate'
 
 
 [tasks.api]
-depends = ['checkdeps', 'migrate']
-run = 'granian --interface asginl core.asgi:application'
+depends = ['migrate']
+run = 'cd backend && granian --interface asginl core.asgi:application'
 
 
 [tasks.dev-client]
-run = 'pnpm --color run dev'
+run = 'cd frontend && pnpm --color run dev'
 
 
 [tasks.dev]
@@ -36,13 +36,14 @@ POSTGRES_USER = 'postgres'
 POSTGRES_PASSWORD = 'postgres'
 POSTGRES_DB = 'postgres'
 POSTGRES_PORT = 5433
-DATABASE_URL = 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}'
+POSTGRES_HOST = 'localhost'
 
 # Electric 
 ELECTRIC_PORT = 5133
 ELECTRIC_URL = 'ws://localhost:${ELECTRIC_PORT}'
 ELECTRIC_AUTH_JWT_ALG = 'HS256'
 ELECTRIC_AUTH_JWT_KEY = 'SUPER_SECRET_JWT_KEY_CHANGE_ME'
+ELECTRIC_INSECURE = true
 
 # Django
 ALLOWED_HOSTS = 'localhost 127.0.0.1 [::1]' 
@@ -51,7 +52,7 @@ DJANGO_SECRET_KEY = 'SECRET_KEY'
 
 
 # Granian
-GRANIAN_RELOAD = 1 
+GRANIAN_RELOAD = 0
 GRANIAN_RELOAD_IGNORE_PATTERNS = '(?<!\.py)$'
 GRANIAN_PORT = 8000 
 GRANIAN_WORKERS = 1 

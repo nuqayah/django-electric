@@ -1,22 +1,8 @@
 <script>
-  import { subscrite_to_shape } from './lib/electric.js'
-  import {onMount} from 'svelte'
 
-  function connect() {
-    try{
-      subscrite_to_shape()
-
-    }catch(e) {
-      console.error(`failed to connect : ${e}`)
-    }
-  }
-
-  onMount(() => {
-    connect()
-  })
-
+  import TaskList from "./components/TaskList.svelte";
 </script>
 
-<main>
-  <h1>hello</h1>
+<main class="flex justify-center items-center h-screen">
+  <TaskList />
 </main>
