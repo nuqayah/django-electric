@@ -1,7 +1,6 @@
 <script>
 	import { create_electric_store } from '../store.js'; 
 	import { task_api } from '../utils/api-calls.js';
-	import { Button } from '$lib/components/ui/button';
 	import TaskItem from './TaskItem.svelte';
 	import TaskDialog from './TaskDialog.svelte';
 
@@ -11,7 +10,7 @@
 	});
 
 	let store_data = $state($tasks_store);
-	
+
 	$effect(() => {
 		const unsubscribe = tasks_store.subscribe((data) => {
 			store_data = data;
@@ -20,7 +19,7 @@
 	});
 
 	let tasks = $derived(
-		store_data.data.sort(
+		store_data.data.toSorted(
 		(a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
 	))
 
@@ -46,18 +45,6 @@
 	}
 
 
-	async function handle_save(saved_task) {
-		try {
-			if (editing_task) {
-				await task_api.update(saved_task.id, saved_task);
-			} else {
-				await task_api.create(saved_task);
-			}
-		} catch (e) {
-			console.error('Error saving task:', e);
-		}
-	}
-
 	async function handle_update(updated_task) {
 		try {
 			await task_api.update(updated_task.id, updated_task);
@@ -75,10 +62,16 @@
 	}
 </script>
 
-<div class="w-full max-w-2xl mx-auto">
-	<div class="flex justify-between items-center mb-6">
+<div class="mx-auto w-full max-w-2xl">
+	<div class="mb-6 flex items-center justify-between">
 		<h1 class="text-3xl font-bold">My Tasks</h1>
-		<Button onclick={handle_open_create_dialog}>+ Create Task</Button>
+
+		<button
+			on:click={handle_open_create_dialog}
+			class="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+		>
+			+ Create Task
+		</button>
 	</div>
 
 	{#if is_loading}
@@ -89,7 +82,7 @@
 			{error}
 		</div>
 	{:else if tasks.length === 0}
-		<p class="text-center text-muted-foreground mt-8">No tasks yet. Create one to get started!</p>
+		<p class="mt-8 text-center text-muted-foreground">No tasks yet. Create one to get started!</p>
 	{:else}
 		<div>
 			{#each tasks as task (task.id)}
@@ -97,16 +90,11 @@
 					{task}
 					on_edit={() => handle_open_edit_dialog(task)}
 					on_delete={() => handle_delete(task.id)}
-					on_update={handle_update}
+					on_update={(updated_task) => handle_update(updated_task)}
 				/>
 			{/each}
 		</div>
 	{/if}
 
-	<TaskDialog
-		open={is_dialog_open}
-		task={editing_task}
-		on_save={handle_save}
-		on_close={handle_close_dialog}
-	/>
+	<TaskDialog  open={is_dialog_open} task={editing_task} on_close={handle_close_dialog} />
 </div>
