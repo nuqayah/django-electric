@@ -1,5 +1,4 @@
-version: "3.3"
-name: "electric_quickstart"
+name: electric_quickstart
 
 services:
   postgres:
@@ -26,6 +25,6 @@ services:
 
       ELECTRIC_INSECURE: true
     ports:
-      - "3000:3000"
+      - 3000:3000
     depends_on:
       - postgres
