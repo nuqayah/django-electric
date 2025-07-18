@@ -43,7 +43,7 @@ arg "deploy_folder" default=""
 run = '''
 host=${usage_deploy_host:-$DEPLOY_HOST}
 folder=${usage_deploy_folder:-$DEPLOY_FOLDER}
-git archive backend | zstd | ssh $host "
+git archive HEAD backend | zstd | ssh $host "
   set -eu
   cd /srv/apps/$folder
   rm -rf **/migrations/*.py
@@ -56,7 +56,7 @@ git archive backend | zstd | ssh $host "
 [tasks.deploy]
 depends = ['build:frontend']
 run = '''
-scp -C dist/index.html ${DEPLOY_HOST}:/srv/apps/${DEPLOY_FOLDER}/client
+scp -Cr frontend/dist/* ${DEPLOY_HOST}:/srv/apps/${DEPLOY_FOLDER}/client
 mise run deploy:backend
 ssh ${DEPLOY_HOST} "sudo service ${DEPLOY_FOLDER} restart"
 '''
@@ -92,3 +92,5 @@ GRANIAN_WORKERS = 1
 # Python
 PYTHONUNBUFFERED = 1
 DEPLOY_FOLDER = 'electric'
+
+MISE_UNIX_DEFAULT_INLINE_SHELL_ARGS = 'bash -c -euo pipefail'
