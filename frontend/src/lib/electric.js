@@ -7,6 +7,15 @@ export class ElectricService {
 		this.streams = new Map();
 	}
 
+	get_fetch_options() {
+		return {
+			credentials: 'include', // Important for session cookies
+			headers: {
+				'Content-Type': 'application/json',
+			}
+		};
+	}
+
 	create_shape_stream(options) {
 		const { table, where, columns, params, replica = 'default', headers } = options;
 
@@ -27,6 +36,39 @@ export class ElectricService {
 			},
 			headers
 		});
+
+		this.streams.set(stream_key, stream);
+		return stream;
+	}
+
+	async create_user_shape_stream(options) {
+		const { table, where, columns, params, replica = 'default', headers = {} } = options;
+
+		const proxy_url = `${this.base_url}/api/shapes/tasks`;
+		
+		const stream_key = `user-${table}-${where || ''}-${columns?.join(',') || ''}`;
+
+		if (this.streams.has(stream_key)) {
+			return this.streams.get(stream_key);
+		}
+
+		const auth_headers = {};
+		const fetch_options = this.get_fetch_options();
+		const merged_headers = { ...auth_headers, ...fetch_options.headers, ...headers };
+
+		const stream = new ShapeStream({
+			url: proxy_url,
+			params: {
+				table,
+				where,
+				columns,
+				params,
+				replica
+			},
+			headers: merged_headers,
+			credentials: 'include',
+		});
+
 
 		this.streams.set(stream_key, stream);
 		return stream;

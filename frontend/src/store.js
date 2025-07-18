@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import { electric } from './lib/electric.js';
 
-export function create_electric_store(config) {
+export  function create_electric_store(config) {
 	const initial_data = {
 		data: [],
 		is_loading: true,
@@ -11,46 +11,45 @@ export function create_electric_store(config) {
 
 	const { subscribe, set, update } = writable(initial_data);
 
-	const stream = electric.create_shape_stream(config);
-	const shape = electric.create_shape(stream);
+	const initialize = async () => {
+		try {
+			const stream = await electric.create_user_shape_stream(config);
 
-	shape.subscribe(({ rows }) => {
-		update((state) => ({
-			...state,
-			data: rows,
-			is_loading: false,
-			last_synced_at: Date.now(),
-			error: undefined
-		}));
-	});
+			const shape = electric.create_shape(stream);
 
-	stream.subscribe(
-		() => {},
-		(error) => {
+			shape.subscribe(({ rows }) => {
+				update((state) => ({
+					...state,
+					data: rows,
+					is_loading: false, 
+					last_synced_at: Date.now(),
+					error: undefined
+				}));
+			});
+
+			stream.subscribe(
+				() => {}, 
+				(error) => {
+					console.error('Stream connection error:', error);
+					update((state) => ({ ...state, error, is_loading: false }));
+				}
+			);
+
+			const initialRows = await shape.rows;
 			update((state) => ({
 				...state,
-				error,
-				is_loading: false
-			}));
-		}
-	);
-
-	shape.rows
-		.then((rows) => {
-			update((state) => ({
-				...state,
-				data: rows,
-				is_loading: false,
+				data: initialRows,
+				is_loading: false, 
 				last_synced_at: Date.now()
 			}));
-		})
-		.catch((error) => {
-			update((state) => ({
-				...state,
-				error,
-				is_loading: false
-			}));
-		});
+
+		} catch (error) {
+			console.error('Failed to initialize electric store:', error);
+			update((state) => ({ ...state, error, is_loading: false }));
+		}
+	};
+
+	initialize();
 
 	return {
 		subscribe,
