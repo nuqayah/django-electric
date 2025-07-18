@@ -1,10 +1,12 @@
 [tools]
 python = "3.12"
 node = "22"
+pnpm = '10'
 
 
 [tasks.db-up]
 run = 'docker compose up -d --wait'
+
 
 [tasks.electric-up]
 run = "docker compose up -d electric"
