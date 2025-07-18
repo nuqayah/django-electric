@@ -41,13 +41,13 @@ arg "deploy_folder" default=""
 run = '''
 host=${usage_deploy_host:-$DEPLOY_HOST}
 folder=${usage_deploy_folder:-$DEPLOY_FOLDER}
-git archive HEAD fs core mise.toml uv.lock pyproject.toml compose.yml manage.py | zstd | ssh $host "
+git archive backend | zstd | ssh $host "
   set -eu
   cd /srv/apps/$folder
   rm -rf **/migrations/*.py
   fd -t d __pycache__ -x rm -r '{}'
   tar --zstd -xf -
-  mise x -- uv sync --inexact
+  mise x -- uv sync
 "
 '''
 
@@ -90,10 +90,3 @@ GRANIAN_WORKERS = 1
 # Python
 PYTHONUNBUFFERED = 1
 DEPLOY_FOLDER = 'electric'
-
-
-
-
-
-
-
