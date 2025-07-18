@@ -31,8 +31,8 @@ depends = ['api', 'dev-client']
 
 [tasks.'build:frontend']
 run = '''
-[ -z "${CI:-}" ] || pnpm install
-pnpm build
+[ -z "${CI:-}" ] || pnpm -C frontend install
+pnpm -C frontend build
 '''
 
 [tasks.'deploy:backend']
