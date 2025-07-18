@@ -14,16 +14,16 @@ run = "docker compose up -d electric"
 
 [tasks.migrate]
 depends = ['db-up']
-run = 'cd backend && uv run manage.py migrate'
+run = 'uv run manage.py migrate'
 
 
 [tasks.api]
 depends = ['migrate']
-run = 'cd backend && granian --interface asginl core.asgi:application'
+run = 'granian --interface asginl core.asgi:application'
 
 
 [tasks.dev-client]
-run = 'cd frontend && pnpm --color run dev'
+run = 'pnpm --color run dev'
 
 
 [tasks.dev]
