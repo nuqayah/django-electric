@@ -25,6 +25,6 @@ services:
 
       ELECTRIC_INSECURE: true
     ports:
-      - 3000:3000
+      - ${ELECTRIC_PORT}:3000
     depends_on:
       - postgres
