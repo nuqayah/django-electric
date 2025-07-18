@@ -43,7 +43,7 @@ arg "deploy_folder" default=""
 run = '''
 host=${usage_deploy_host:-$DEPLOY_HOST}
 folder=${usage_deploy_folder:-$DEPLOY_FOLDER}
-git archive HEAD backend mise.toml compose.yaml | zstd | ssh $host "
+git archive HEAD core tmp_app mise.toml compose.yaml | zstd | ssh $host "
   set -eu
   cd /srv/apps/$folder
   rm -rf **/migrations/*.py
@@ -56,7 +56,7 @@ git archive HEAD backend mise.toml compose.yaml | zstd | ssh $host "
 [tasks.deploy]
 depends = ['build:frontend']
 run = '''
-scp -Cr frontend/dist/* ${DEPLOY_HOST}:/srv/apps/${DEPLOY_FOLDER}/client
+scp -Cr dist/* ${DEPLOY_HOST}:/srv/apps/${DEPLOY_FOLDER}/client
 mise run deploy:backend
 ssh ${DEPLOY_HOST} "sudo service ${DEPLOY_FOLDER} restart"
 '''
