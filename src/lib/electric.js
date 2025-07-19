@@ -25,7 +25,7 @@ export class ElectricService {
 		}
 
 		const stream = new ShapeStream({
-			url: `/v1/shape`,
+			url: `${window.location.origin}/v1/shape`,
 			params: {
 				table,
 				where,
