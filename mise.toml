@@ -49,7 +49,7 @@ git archive HEAD core tmp_app manage.py uv.lock mise.toml compose.yaml | zstd | 
   rm -rf **/migrations/*.py
   fd -t d __pycache__ -x rm -r '{}'
   tar --zstd -xf -
-  mise x -- uv sync
+  mise x -- uv sync --inexact
 "
 '''
 
