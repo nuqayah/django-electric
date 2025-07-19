@@ -22,7 +22,6 @@
 		store_data.data.toSorted(
 		(a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
 	))
-
 	let is_loading = $derived(store_data.is_loading)
 
 	let error = $derived(store_data.error?.message || null)
@@ -67,7 +66,7 @@
 		<h1 class="text-3xl font-bold">My Tasks</h1>
 
 		<button
-			on:click={handle_open_create_dialog}
+			onclick={handle_open_create_dialog}
 			class="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 		>
 			+ Create Task

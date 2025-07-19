@@ -43,7 +43,7 @@
 					type="checkbox"
 					id="is_done_{task.id}"
 					checked={task.is_done}
-					on:click={handle_toggle_done}
+					onclick={handle_toggle_done}
 				/>
 				<label
 					for="is_done_{task.id}"
@@ -73,14 +73,14 @@
 		<div class="flex space-x-2">
 
 			<button
-				on:click={on_edit}
+				onclick={on_edit}
 				class="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md border border-input bg-background px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 			>
 				Edit
 			</button>
 
 			<button
-				on:click={handle_delete}
+				onclick={handle_delete}
 				class="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md bg-destructive px-3 text-sm font-medium text-destructive-foreground ring-offset-background transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 			>
 				Delete

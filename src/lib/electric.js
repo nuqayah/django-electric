@@ -1,7 +1,7 @@
 import { ShapeStream, Shape } from '@electric-sql/client';
 
 export class ElectricService {
-	constructor(base_url = 'http://localhost:3000') {
+	constructor(base_url = import.meta.env.VITE_ELECTRIC_URL) {
 		this.base_url = base_url;
 		this.shapes = new Map();
 		this.streams = new Map();
@@ -17,6 +17,7 @@ export class ElectricService {
 	}
 
 	create_shape_stream(options) {
+		console.log(this.base_url)
 		const { table, where, columns, params, replica = 'default', headers } = options;
 
 		const stream_key = `${table}-${where || ''}-${columns?.join(',') || ''}`;
@@ -58,6 +59,8 @@ export class ElectricService {
 
 		const stream = new ShapeStream({
 			url: proxy_url,
+			headers: merged_headers,
+			credentials: 'include',
 			params: {
 				table,
 				where,
@@ -65,8 +68,7 @@ export class ElectricService {
 				params,
 				replica
 			},
-			headers: merged_headers,
-			credentials: 'include',
+			
 		});
 
 

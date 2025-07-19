@@ -13,7 +13,7 @@ export  function create_electric_store(config) {
 
 	const initialize = async () => {
 		try {
-			const stream = await electric.create_user_shape_stream(config);
+			const stream = await electric.create_shape_stream(config);
 
 			const shape = electric.create_shape(stream);
 

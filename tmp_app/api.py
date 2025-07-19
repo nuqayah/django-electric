@@ -1,4 +1,4 @@
-from ninja import NinjaAPI
+from ninja import NinjaAPI, Query
 from typing import List
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
@@ -10,43 +10,49 @@ from ninja.errors import HttpError
 import httpx
 from django.http import StreamingHttpResponse
 from django.conf import settings
+from ninja.security import SessionAuth
 
 api = NinjaAPI()
 
 User = get_user_model()
 
-class IsAuthenticated(HttpBearer):
-    def authenticate(self, request, token: str):
-        if request.user.is_authenticated:
-            return request.user 
-        return None
-
-auth = IsAuthenticated()
+auth = SessionAuth()
 
 # WIP
-@api.post("/shapes/tasks")
-def get_tasks_shape(request, params: ShapeParams):
+@api.get("/shapes/tasks")
+def get_tasks_shape(request, params: ShapeParams = Query()):
+    """
+    a generator that streams the response from an upstream ElectricSQL shape endpoint
+    """
+
     electric_shape_url = f"{settings.ELECTRIC_URL}/v1/shape"
 
     electric_params = params.dict(exclude_none=True)
 
     try:
-        with httpx.stream("GET", electric_shape_url, params=electric_params, timeout=30.0) as response:
-            response.raise_for_status()
+        response_context_manager = httpx.stream("GET", electric_shape_url, params=electric_params, timeout=30.0)
+        response = response_context_manager.__enter__()  
+        response.raise_for_status()
 
-            def stream_generator():
+
+        def stream_generator(): 
+            nonlocal response_context_manager
+            try:
                 yield from response.iter_bytes()
+            finally:
+                if response_context_manager:
+                    response_context_manager.__exit__(None, None, None)
 
-            django_response = StreamingHttpResponse(
-                stream_generator(),
-                content_type=response.headers.get('content-type'),
-                status=response.status_code,
-            )
-            for header, value in response.headers.items():
-                if header.lower().startswith('electric-') or header.lower() == 'cache-control':
-                    django_response[header] = value
+        django_response = StreamingHttpResponse(
+            stream_generator(),
+            content_type=response.headers.get('content-type'),
+            status=response.status_code,
+        )
+        for header, value in response.headers.items():
+            if header.lower().startswith('electric-') or header.lower() == 'cache-control':
+                django_response[header] = value
 
-            return django_response                                                                                                                                                                                                          
+        return django_response                                                                                                                                                                                                          
 
     except httpx.HTTPStatusError as e:
 
@@ -112,7 +118,7 @@ def get_task(request, task_id: int):
 
 @api.put("/tasks/{task_id}", response=TaskSchemaOut, auth=auth)
 def update_task(request, task_id: int, payload: TaskSchemaIn):
-
+    print('helllll')
     task = get_object_or_404(Task, id=task_id, user=request.user)
     for attr, value in payload.dict().items():
         setattr(task, attr, value)
