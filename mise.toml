@@ -43,7 +43,7 @@ arg "deploy_folder" default=""
 run = '''
 host=${usage_deploy_host:-$DEPLOY_HOST}
 folder=${usage_deploy_folder:-$DEPLOY_FOLDER}
-git archive HEAD core tmp_app manage.py uv.lock mise.toml compose.yaml | zstd | ssh $host "
+git archive HEAD core tmp_app manage.py uv.lock mise.toml compose.yaml pyproject.toml | zstd | ssh $host "
   set -eu
   cd /srv/apps/$folder
   rm -rf **/migrations/*.py
@@ -60,6 +60,9 @@ scp -Cr dist/* ${DEPLOY_HOST}:/srv/apps/${DEPLOY_FOLDER}/client
 mise run deploy:backend
 ssh ${DEPLOY_HOST} "sudo service ${DEPLOY_FOLDER} restart"
 '''
+
+[settings]
+python.uv_venv_auto = true
 
 [env]
 
