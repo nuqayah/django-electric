@@ -136,4 +136,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'tmp_app.CustomUser'
 
-ELECTRIC_URL = os.getenv('VITE_ELECTRIC_URL','http://localhost:3010')
+ELECTRIC_PORT = os.getenv('ELECTRIC_PORT', '3010')
+ELECTRIC_URL = f'http://localhost:{ELECTRIC_PORT}'
+
+

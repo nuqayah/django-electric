@@ -11,10 +11,14 @@ export default defineConfig({
   ],
   server: {
         host: !!process.env.VITE_HOST || '0.0.0.0',
-        proxy: {'^/api.*': {target: `http://localhost:${process.env.GRANIAN_PORT || 8000}`}},
+        proxy: {
+          '^/api.*': {target: `http://localhost:${process.env.GRANIAN_PORT || 8000}`},
+          '^/v1/shape.*': {target: `http://localhost:${process.env.ELECTRIC_PORT || 3010}`}
+        },
         watch: {
             ignored: ['storage', '.venv'],
         },
+
     },
   resolve: {
 		alias: [ 
