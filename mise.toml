@@ -43,7 +43,7 @@ arg "deploy_folder" default=""
 run = '''
 host=${usage_deploy_host:-$DEPLOY_HOST}
 folder=${usage_deploy_folder:-$DEPLOY_FOLDER}
-git archive HEAD core tmp_app manage.py mise.toml compose.yaml | zstd | ssh $host "
+git archive HEAD core tmp_app manage.py uv.lock mise.toml compose.yaml | zstd | ssh $host "
   set -eu
   cd /srv/apps/$folder
   rm -rf **/migrations/*.py
