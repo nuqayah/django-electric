@@ -27,6 +27,7 @@ SECRET_KEY = 'django-insecure-@d8^i17((^8$f*yru8sl&r!bqubs_e00)je$9c)9yfrziual65
 DEBUG = True
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split()
+CSRF_TRUSTED_ORIGINS = ALLOWED_HOSTS
 
 
 # Application definition
@@ -139,6 +140,4 @@ AUTH_USER_MODEL = 'tmp_app.CustomUser'
 ELECTRIC_PORT = os.getenv('ELECTRIC_PORT', '3010')
 ELECTRIC_URL = f'http://localhost:{ELECTRIC_PORT}'
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://localhost:8090'
-]
+
