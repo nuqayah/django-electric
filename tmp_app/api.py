@@ -8,9 +8,11 @@ from .schemas import CurrentUser, LoginSchema, MessageSchema, RegisterSchema, Sh
 from ninja.security import HttpBearer
 from ninja.errors import HttpError
 import httpx
-from django.http import StreamingHttpResponse
+from django.http import JsonResponse, StreamingHttpResponse
 from django.conf import settings
 from ninja.security import SessionAuth
+from django.views.decorators.csrf import ensure_csrf_cookie
+
 
 api = NinjaAPI()
 
@@ -131,3 +133,12 @@ def delete_task(request, task_id: int):
     task = get_object_or_404(Task, id=task_id, user=request.user)
     task.delete()
     return 204
+
+
+@api.get("/get-csrf-token/", auth=None)
+@ensure_csrf_cookie
+def get_csrf_token(request):
+    """
+    send the CSRF cookie to the client.
+    """
+    return JsonResponse({"detail": "CSRF cookie set"})

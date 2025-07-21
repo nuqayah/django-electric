@@ -54,3 +54,7 @@ pnpm-debug.log*
 # === Frontend env ===
 .env
 .env.*
+
+
+# === Caddy ===
+Caddyfile
