@@ -43,7 +43,7 @@ export class ElectricService {
 	async create_user_shape_stream(options) {
 		const { table, where, columns, params, replica = 'default', headers = {} } = options;
 
-		const proxy_url = `/api/shapes/tasks`;
+		const proxy_url = `${window.location.origin}/api/shapes/tasks`
 		
 		const stream_key = `user-${table}-${where || ''}-${columns?.join(',') || ''}`;
 
@@ -58,7 +58,6 @@ export class ElectricService {
 		const stream = new ShapeStream({
 			url: proxy_url,
 			headers: merged_headers,
-			credentials: 'include',
 			params: {
 				table,
 				where,

@@ -5,7 +5,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from .models import Task
 from .schemas import CurrentUser, LoginSchema, MessageSchema, RegisterSchema, ShapeParams, TaskSchemaIn, TaskSchemaOut
-from ninja.security import HttpBearer
 from ninja.errors import HttpError
 import httpx
 from django.http import JsonResponse, StreamingHttpResponse
@@ -13,59 +12,57 @@ from django.conf import settings
 from ninja.security import SessionAuth
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-
 api = NinjaAPI()
 
 User = get_user_model()
 
 auth = SessionAuth()
 
+async def _stream_proxy_response(response: httpx.Response):
+    try:
+        async for chunk in response.aiter_bytes():
+            yield chunk
+    finally:
+        await response.aclose()
+
 # WIP
 @api.get("/shapes/tasks")
-def get_tasks_shape(request, params: ShapeParams = Query()):
+async def get_tasks_shape(request, params: ShapeParams = Query()):
     """
     a generator that streams the response from an upstream ElectricSQL shape endpoint
     """
-
     electric_shape_url = f"{settings.ELECTRIC_URL}/v1/shape"
-
     electric_params = params.dict(exclude_none=True)
 
+    user = await request.auser()
+    electric_params['where'] = f'"user_id" = {user.id}'
+
+
     try:
-        response_context_manager = httpx.stream("GET", electric_shape_url, params=electric_params, timeout=30.0)
-        response = response_context_manager.__enter__()  
-        response.raise_for_status()
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.get(electric_shape_url, params=electric_params)
+            response.raise_for_status()
 
+            django_response = StreamingHttpResponse(
+                streaming_content=_stream_proxy_response(response),
+                content_type=response.headers.get('content-type'),
+                status=response.status_code,
+            )
 
-        def stream_generator(): 
-            nonlocal response_context_manager
-            try:
-                yield from response.iter_bytes()
-            finally:
-                if response_context_manager:
-                    response_context_manager.__exit__(None, None, None)
-
-        django_response = StreamingHttpResponse(
-            stream_generator(),
-            content_type=response.headers.get('content-type'),
-            status=response.status_code,
-        )
-        for header, value in response.headers.items():
-            if header.lower().startswith('electric-') or header.lower() == 'cache-control':
-                django_response[header] = value
-
-        return django_response                                                                                                                                                                                                          
+            for header, value in response.headers.items():
+                if header.lower().startswith('electric-') or header.lower() == 'cache-control':
+                    django_response[header] = value
+            
+            return django_response
 
     except httpx.HTTPStatusError as e:
-
-        print(f"Error from Electric service")
-        raise HttpError(e.response.status_code, f"Electric server error")
+        raise HttpError(e.response.status_code, f"Upstream error: {e.response.status_code}")
 
     except httpx.RequestError as e:
-        raise HttpError(500, f"Failed to connect to Electric server: {e}")
+        raise HttpError(503, "Service Unavailable: Cannot connect to upstream service.")
 
     except httpx.TimeoutException:
-        raise HttpError(504, "Electric server timeout")
+        raise HttpError(504, "Gateway Timeout: Upstream service did not respond in time.")
     
 
 @api.post('/auth/register', response={200: MessageSchema, 400: MessageSchema})
@@ -100,13 +97,13 @@ def get_current_user(request):
 
 
 
-@api.post("/tasks", response=TaskSchemaOut)
+@api.post("/tasks", response=TaskSchemaOut, auth=auth)
 def create_task(request, data: TaskSchemaIn):
 
     task = Task.objects.create(user=request.user, **data.dict())
     return task
 
-@api.get("/tasks", response=List[TaskSchemaOut])
+@api.get("/tasks", response=List[TaskSchemaOut], auth=auth)
 def list_tasks(request):
 
     tasks = Task.objects.filter(user=request.user)

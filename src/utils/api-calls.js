@@ -21,6 +21,7 @@ async function request(url, options = {}) {
     };
 
 
+
     const response = await fetch(`/api${url}`, {
         ...options,
         headers: headers 
@@ -55,7 +56,8 @@ export const task_api = {
 	get: (id) => request(`/tasks/${id}`),
 	create: (payload) => request('/tasks', {
 		method: 'POST',
-		body: JSON.stringify(payload)
+		body: JSON.stringify(payload),
+        headers: {'X-CSRFToken': csrftoken}
 	}),
 	update: (id, payload) => request(`/tasks/${id}`, {
 		method: 'PUT',
