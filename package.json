@@ -26,6 +26,7 @@
     "@electric-sql/pglite": "^0.3.4",
     "@prisma/client": "~5.11.0",
     "@tailwindcss/vite": "^4.1.11",
+    "navaid": "^1.2.0",
     "tailwindcss": "^4.0.0"
   },
   "pnpm": {

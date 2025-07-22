@@ -1,5 +1,52 @@
-import { writable } from 'svelte/store';
+import { writable, readable } from 'svelte/store';
 import { electric } from './lib/electric.js';
+import {router} from './App.svelte'
+
+
+export const appstate = writable({})
+export const session = writable({
+    loaded: false,
+    is_authenticated: false,
+    is_superuser: false,
+})
+;(async function init() {
+
+    let is_authenticated = false
+    let is_superuser = false
+
+    const response = await fetch('/api/auth/me')
+    const data = await response.json()
+    if (data.is_authenticated) {
+        is_authenticated = true
+    }
+
+    if (data.is_superuser) {
+        is_superuser = true
+    }
+
+    session.update(v => ({
+        ...v,
+        is_authenticated,
+        is_superuser,
+        loaded: true,
+    }))
+
+    router.listen()
+})()
+
+
+export const now = readable(new Date(), function start(set) {
+    const interval = setInterval(() => {
+        set(new Date())
+    }, 60000)
+
+    return function stop() {
+        clearInterval(interval)
+    }
+})
+
+
+
 
 export  function create_electric_store(config) {
 	const initial_data = {
