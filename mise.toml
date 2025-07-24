@@ -4,6 +4,10 @@ node = "22"
 pnpm = '10'
 
 
+[tasks.clean]
+run = 'docker compose down -v'
+
+
 [tasks.db-up]
 run = 'docker compose up -d --wait'
 
@@ -17,8 +21,13 @@ depends = ['db-up']
 run = 'uv run manage.py migrate'
 
 
-[tasks.api]
+[tasks.create-default-user]
 depends = ['migrate']
+run = 'python manage.py createuser'
+
+
+[tasks.api]
+depends = ['create-default-user']
 run = 'granian --interface asginl core.asgi:application'
 
 
