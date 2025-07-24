@@ -3,7 +3,6 @@ import { electric } from './lib/electric.js';
 import {router} from './App.svelte'
 
 
-export const appstate = writable({})
 export const session = writable({
     loaded: false,
     is_authenticated: false,
