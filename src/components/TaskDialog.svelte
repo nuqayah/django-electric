@@ -3,7 +3,7 @@
 
 
 
-	let { open, task, on_close } = $props();
+	let { open, task, on_close, refresh } = $props();
 
 	let form_data = $state({ title: '', description: '', is_done: false });
 	let is_saving = $state(false);
@@ -31,6 +31,10 @@
 			task
 				? await task_api.update(task.id, form_data)
 				: await task_api.create(form_data);
+
+			if(!task){
+				await refresh()
+			}
 
 			on_close();
 		} catch (error) {

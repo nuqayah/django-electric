@@ -47,59 +47,84 @@ export const now = readable(new Date(), function start(set) {
 
 
 
-export  function create_electric_store(config) {
-	const initial_data = {
-		data: [],
-		is_loading: true,
-		last_synced_at: undefined,
-		error: undefined
-	};
+export function create_electric_store(config) {
+    const initial_data = {
+        data: [],
+        is_loading: true,
+        last_synced_at: undefined,
+        error: undefined
+    };
 
-	const { subscribe, set, update } = writable(initial_data);
+    const { subscribe, set, update } = writable(initial_data);
+    
+    let current_stream = null;
+    let current_shape = null;
+    let cleanup_functions = [];
+    let stream_key = null;
 
-	const initialize = async () => {
-		try {
-			const stream = await electric.create_user_shape_stream(config)
+    const cleanup = async () => {
+        cleanup_functions.forEach(fn => fn());
+        cleanup_functions = [];
+        
+        if (current_stream) {
+            current_stream.unsubscribeAll();
+            current_stream = null;
+        }
+        
+        if (current_shape) {
+            current_shape = null;
+        }
+    };
 
-			const shape = electric.create_shape(stream);
+    const initialize = async (force_refresh = false) => {
+        try {
+            update(state => ({ ...state, is_loading: true, error: undefined }));
 
-			shape.subscribe(({ rows }) => {
-				update((state) => ({
-					...state,
-					data: rows,
-					is_loading: false, 
-					last_synced_at: Date.now(),
-					error: undefined
-				}));
-			});
+            await cleanup();
 
-			stream.subscribe(
-				() => {}, 
-				(error) => {
-					console.error('Stream connection error:', error);
-					update((state) => ({ ...state, error, is_loading: false }));
-				}
-			);
+            current_stream = await electric.create_user_shape_stream(config);
+            current_shape = electric.create_shape(current_stream);
 
-			const initialRows = await shape.rows;
-			update((state) => ({
-				...state,
-				data: initialRows,
-				is_loading: false, 
-				last_synced_at: Date.now()
-			}));
+            const shape_unsubscribe = current_shape.subscribe(({ rows }) => {
+                update((state) => ({
+                    ...state,
+                    data: rows,
+                    is_loading: false,
+                    last_synced_at: Date.now(),
+                    error: undefined
+                }));
+            });
 
-		} catch (error) {
-			console.error('Failed to initialize electric store:', error);
-			update((state) => ({ ...state, error, is_loading: false }));
-		}
-	};
+            const stream_unsubscribe = current_stream.subscribe(
+                () => {},
+                (error) => {
+                    console.error('Stream connection error:', error);
+                    update((state) => ({ ...state, error, is_loading: false }));
+                }
+            );
 
-	initialize();
+            cleanup_functions.push(shape_unsubscribe, stream_unsubscribe);
 
-	return {
-		subscribe,
+            const initialRows = await current_shape.rows;
+            update((state) => ({
+                ...state,
+                data: initialRows,
+                is_loading: false,
+                last_synced_at: Date.now()
+            }));
+
+        } catch (error) {
+            console.error('Failed to initialize electric store:', error);
+            update((state) => ({ ...state, error, is_loading: false }));
+        }
+    };
+
+    initialize();
+
+    return {
+        subscribe,
 		set,
-		update
-	};
+		update,
+        refresh: async () =>  await initialize(true),
+    };
 }

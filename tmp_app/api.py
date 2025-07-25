@@ -27,7 +27,6 @@ async def _stream_proxy_response(response: httpx.Response):
 
     
 async def _forward_request_to_electric(client, url, params):
-    print(f"DEBUG: Forwarding request to ElectricSQL with params: {params}")
     response = await client.get(url, params=params)
     return response
 
@@ -64,8 +63,6 @@ async def get_tasks_shape(request, params: ShapeParams = Query()):
             return django_response
 
     except httpx.HTTPStatusError as e:
-        error_body = await e.response.aread()
-        print(f"ERROR: Unrecoverable upstream error {e.response.status_code}. Body: {error_body.decode()}")
         raise
     except httpx.RequestError:
         raise HttpError(503, "Service Unavailable: Cannot connect to upstream service.")

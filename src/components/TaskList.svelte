@@ -95,5 +95,5 @@
 		</div>
 	{/if}
 
-	<TaskDialog  open={is_dialog_open} task={editing_task} on_close={handle_close_dialog} />
+	<TaskDialog  open={is_dialog_open} task={editing_task} on_close={handle_close_dialog} refresh={tasks_store.refresh} />
 </div>

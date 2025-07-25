@@ -8,7 +8,7 @@ export class ElectricService {
 
 	get_fetch_options() {
 		return {
-			credentials: 'include', // Important for session cookies
+			credentials: 'include', 
 			headers: {
 				'Content-Type': 'application/json',
 			}
